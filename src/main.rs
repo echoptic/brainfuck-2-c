@@ -1,4 +1,7 @@
-use std::{env, fs, process::exit};
+use std::{
+    env, fs,
+    process::{exit, Command},
+};
 
 fn main() {
     let argv: Vec<_> = env::args().collect();
@@ -10,18 +13,19 @@ fn main() {
     let mut code =
         String::from("#include<stdio.h>\nint main(){char array[30000]={0};char *ptr=array;");
 
-    let input = fs::read_to_string(&argv[1]).expect("Unable to read file");
+    let file_name = &argv[1];
+    let input = fs::read_to_string(file_name).expect("Unable to read file");
 
     for chr in input.chars() {
         match chr {
-            '>' => code.push_str("++ptr;"),
-            '<' => code.push_str("--ptr;"),
-            '+' => code.push_str("++*ptr;"),
-            '-' => code.push_str("--*ptr;"),
-            '.' => code.push_str("putchar(*ptr);"),
-            ',' => code.push_str("*ptr=getchar();"),
-            '[' => code.push_str("while(*ptr){"),
-            ']' => code.push_str("}"),
+            '>' => code += "++ptr;",
+            '<' => code += "--ptr;",
+            '+' => code += "++*ptr;",
+            '-' => code += "--*ptr;",
+            '.' => code += "putchar(*ptr);",
+            ',' => code += "*ptr=getchar();",
+            '[' => code += "while(*ptr){",
+            ']' => code += "}",
             _ => {}
         }
     }
@@ -29,4 +33,17 @@ fn main() {
     code.push_str("return 0;}");
 
     fs::write("./out.c", &code).expect("Failed to write to file");
+
+    let mut bin_name = "/".to_owned();
+    bin_name.push_str(file_name.split_once('.').unwrap().0);
+
+    Command::new("gcc")
+        .args(&["out.c", "-o", bin_name.as_ref()])
+        .spawn()
+        .expect("Unable to run gcc")
+        .wait()
+        .unwrap();
+
+    fs::remove_file("./out.c").unwrap();
+    Command::new(bin_name).spawn().unwrap();
 }

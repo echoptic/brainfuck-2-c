@@ -1,8 +1,3 @@
 This is a quick and simple Brainfuck to C compiler.
-I don't think that every program works because I don't handle
-the overflow of cell going to 256 and -1, but every program 
-I tried so far works.
-To compile hello_world.b run:
-cargo run -- hello_world.b
-This will generate out.c file that you can compile with a C compiler(gcc or clang)
-and it outputs: Hello, World!
+When you run the program specify a brainfuck file as an argument
+and it will automatically compile and run the program.
